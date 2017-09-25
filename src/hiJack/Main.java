@@ -1,13 +1,34 @@
 package hiJack;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Scanner;
 
 public class Main {
 	public static void main(String[] args) {
 
-		String target = getArgs(args);
+		String target = getTargetArg(args);
+		String listPath = getListArg(args);
+		
 		System.out.println("Starting");
 	
 		HashSet<String> subdomainSet = SubdomainDork.run(target);
+		if(listPath!=null){
+			int lPC=0;
+			Scanner s;
+			try {
+				s = new Scanner(new File(listPath));
+				while (s.hasNext()){
+					subdomainSet.add(s.next());
+					lPC++;
+				}
+				s.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Added "+lPC+" subdomains from "+listPath);
+		}
 		System.out.println("Looking for cnames in "+subdomainSet.size()+" subdomains");
 		System.out.println(subdomainSet.toString());
 		System.out.println("");
@@ -17,7 +38,7 @@ public class Main {
 		System.out.println("DONE");
 	}
 
-	private static String getArgs(String[] args) {
+	private static String getTargetArg(String[] args) {
 		if (args.length > 0) {
 		    try {
 		    	String val = String.valueOf(args[0]);
@@ -36,6 +57,15 @@ public class Main {
         System.exit(1);
 		return null;
 	}
-
 	
+	private static String getListArg(String[] args) {
+		if (args.length > 1) {
+		    try {
+		    	String val = String.valueOf(args[1]);
+		    	return val;
+		    } catch (Exception e) {
+		    }
+		}
+		return null;
+	}
 }

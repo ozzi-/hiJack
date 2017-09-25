@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class HiJack {
 	
 	public static void searchForCNamesHijacks(HashSet<String> subdomainSet) {
+		boolean found=false;
 		for (String string : subdomainSet) {
 			try {
 				Process extProc = Runtime.getRuntime().exec("dig " + string);
@@ -29,6 +30,7 @@ public class HiJack {
 								String to = digLine.substring(toStart);
 								if(isURLRegistered(to)){
 									System.out.println("Found potential hijack: "+from + " CNAME " + to);
+									found=true;
 								}
 							}
 						}
@@ -38,6 +40,9 @@ public class HiJack {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		if(!found){
+			System.out.println("Found no hijack possibilities ...");
 		}
 	}
 
