@@ -7,12 +7,18 @@ https://twitter.com/seckle_ch/status/912221121910575105
 
 
 # Usage
-Example of a "safe" target:
+Example of a "safe" target which adds an additional subdomain file (1 host per line) and a specific DNS resolver
 ```
-/Desktop$ java -jar hijack.jar oz-web.com
+/Desktop$ java -jar hijack.jar oz-web.com /home/ozzi/additionalSubdomainFile 172.0.100.100
 Starting
-Looking for cnames in 3 subdomains
-[www.b.oz-web.com, www.oz-web.com, b.oz-web.com]
+3 subdomains found via crt.sh dork
+Testing for AXFR transfer with [ns3.hosttech.ch, ns2.hosttech.ch, ns1.hosttech.ch]
+All AXFR transfers failed
+2 subdomains provided via list /home/ozzi/Desktop/list, effectively added: 2
+5 total number of subdomains that will be checked
+[www.b.oz-web.com, www.oz-web.com, b.oz-web.com, c.oz-web.com, d.oz-web.com]
 
-DONE
+Found no hijack possibilities ...
+Done
+
 ```
