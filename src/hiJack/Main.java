@@ -1,7 +1,6 @@
 package hiJack;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -14,6 +13,7 @@ public class Main {
 		System.out.println("Starting");
 	
 		HashSet<String> subdomainSet = SubdomainDork.run(target);
+		int dorkSDCount = subdomainSet.size();
 		if(listPath!=null){
 			int lPC=0;
 			Scanner s;
@@ -27,7 +27,7 @@ public class Main {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Added "+lPC+" subdomains from "+listPath);
+			System.out.println("Added "+lPC+" subdomains from "+listPath+", effectively added ("+(subdomainSet.size()-dorkSDCount)+")");
 		}
 		System.out.println("Looking for cnames in "+subdomainSet.size()+" subdomains");
 		System.out.println(subdomainSet.toString());
@@ -35,7 +35,7 @@ public class Main {
 		
 		HiJack.searchForCNamesHijacks(subdomainSet);
 		
-		System.out.println("DONE");
+		System.out.println("Done");
 	}
 
 	private static String getTargetArg(String[] args) {
