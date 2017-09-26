@@ -6,11 +6,12 @@ import java.util.Scanner;
 
 public class HiJack {
 	
-	public static void searchForCNamesHijacks(HashSet<String> subdomainSet) {
+	public static void searchForCNamesHijacks(HashSet<String> subdomainSet, String dnsIP) {
 		boolean found=false;
 		for (String string : subdomainSet) {
 			try {
-				Process extProc = Runtime.getRuntime().exec("dig " + string);
+				dnsIP = (dnsIP==null)?"":" @"+dnsIP;
+				Process extProc = Runtime.getRuntime().exec("dig " + string+dnsIP);
 				extProc.waitFor();
 
 				InputStream theInputStream = extProc.getInputStream();
