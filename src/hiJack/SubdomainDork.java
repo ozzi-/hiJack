@@ -90,11 +90,13 @@ public class SubdomainDork {
 				String digResult = scanner.next();
 				String[] digLines = digResult.split("\n");
 				for (String digLine : digLines) {
-					if (digLine.contains("	NS")) {
-						int toStart = digLine.indexOf("NS") + "NS".length()+1;
-						String to = digLine.substring(toStart);
-						to=to.substring(0, to.length()-1);
-						nsSet.add(to);
+					if (digLine.contains("NS")) {
+						if(digLine.indexOf("NS")>5 && digLine.indexOf("NS")<digLine.length()-4 && Character.isWhitespace(digLine.substring(digLine.indexOf("NS")-1,digLine.indexOf("NS")).charAt(0))) {
+							int toStart = digLine.indexOf("NS") + "NS".length()+1;
+							String to = digLine.substring(toStart);
+							to=to.substring(0, to.length()-1);
+							nsSet.add(to);
+						}
 					}
 				}
 			}
