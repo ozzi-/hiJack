@@ -6,11 +6,11 @@ import java.util.Scanner;
 
 public class HiJack {
 	
-	public static void searchForCNamesHijacks(HashSet<String> subdomainSet, String dnsIP) {
+	public static void searchForCNamesHijacks(HashSet<String> subdomainSet, String dnsIPP) {
 		boolean found=false;
 		for (String string : subdomainSet) {
 			try {
-				dnsIP = (dnsIP==null)?"":" @"+dnsIP;
+				String dnsIP = (dnsIPP==null)?"":" @"+dnsIPP;
 				Process extProc = Runtime.getRuntime().exec("dig " + string+dnsIP);
 				extProc.waitFor();
 
@@ -37,6 +37,7 @@ public class HiJack {
 						}
 					}
 				}
+				scanner.close();
 				scannerNoDelimiter.close();
 			} catch (Exception e) {
 				e.printStackTrace();
