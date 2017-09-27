@@ -39,12 +39,12 @@ public class SubdomainDork {
 	 * @param dnsIP 
 	 * @return set of subdomains received through zone transfer
 	 */
-	public static HashSet<String> runAXFR(String target, String dnsIP){
+	public static HashSet<String> runAXFR(String target, String dnsIPP){
 		HashSet<String> subdomainSet = new HashSet<String>();
 		try {
-			HashSet<String> NSSet = getNSOfTarget(target,dnsIP);
+			HashSet<String> NSSet = getNSOfTarget(target,dnsIPP);
 			System.out.println("Testing for AXFR transfer with "+NSSet.toString());
-			dnsIP = (dnsIP==null)?"":" @"+dnsIP;
+			String dnsIP = (dnsIPP==null)?"":" @"+dnsIPP;
 			boolean allFailed=true;
 			for (String NSIP : NSSet) {
 				boolean failed=false;
