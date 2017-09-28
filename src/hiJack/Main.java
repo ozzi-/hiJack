@@ -12,12 +12,27 @@ public class Main {
 		String listPath = getListArg(args);
 		String dnsIP = getDNSIPArg(args);
 		
-		System.out.println("Starting");
-
+		System.out.println("Dorking subdomains for "+target);
 		HashSet<String> subdomainSet = SubdomainDork.runCRTSH(target);
 		System.out.println(subdomainSet.size()+ " subdomains found via crt.sh dork");
+		System.out.println("");
+		
 		int dorkSDCount = subdomainSet.size();
+		subdomainSet = loadList(listPath, subdomainSet, dorkSDCount);
+		System.out.println("");
 		SubdomainDork.runAXFR(target,dnsIP);
+		
+		
+		System.out.println(subdomainSet.size()+" total number of subdomains that will be checked");
+		System.out.println(subdomainSet.toString());
+		System.out.println("");
+
+		HiJack.searchForCNamesHijacks(target,subdomainSet,dnsIP);
+
+		System.out.println("Done");
+	}
+
+	private static HashSet<String> loadList(String listPath, HashSet<String> subdomainSet, int dorkSDCount) {
 		if (listPath != null) {
 			int lPC = 0;
 			Scanner s;
@@ -29,19 +44,14 @@ public class Main {
 				}
 				s.close();
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.err.println("Could not load list file: "+e.getMessage());
+				System.out.println("");
 			}
 			System.out.println(lPC+" subdomains provided via list " + listPath
 					+ ", effectively added: "
 					+ (subdomainSet.size() - dorkSDCount));
 		}
-		System.out.println(subdomainSet.size()+" total number of subdomains that will be checked");
-		System.out.println(subdomainSet.toString());
-		System.out.println("");
-
-		HiJack.searchForCNamesHijacks(subdomainSet,dnsIP);
-
-		System.out.println("Done");
+		return subdomainSet;
 	}
 
 	private static String getTargetArg(String[] args) {

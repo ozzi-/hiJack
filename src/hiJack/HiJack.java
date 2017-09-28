@@ -1,22 +1,16 @@
 package hiJack;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Scanner;
 
 
 public class HiJack {
 	
-	public static void searchForCNamesHijacks(HashSet<String> subdomainSet, String dnsIPP) {
+	public static void searchForCNamesHijacks(String target, HashSet<String> subdomainSet, String dnsIPP) {
 		boolean found=false;
-		for (String string : subdomainSet) {
+		for (String subdomain : subdomainSet) {
 			try {
 				String dnsIP = (dnsIPP==null)?"":" @"+dnsIPP;
-				Process extProc = Runtime.getRuntime().exec("dig " + string+dnsIP);
-				extProc.waitFor();
-
-				InputStream theInputStream = extProc.getInputStream();
-				Scanner scannerNoDelimiter = new java.util.Scanner(theInputStream);
-				Scanner scanner = scannerNoDelimiter.useDelimiter("\\A");
+				Scanner scanner = ProcessToScanner.run("dig " + subdomain+dnsIP);
 				
 				if (scanner.hasNext()) {
 					String digResult = scanner.next();
@@ -29,8 +23,9 @@ public class HiJack {
 								String from = digLine.substring(0, fromEnd);
 								int toStart = digLine.indexOf("CNAME") + "CNAME".length()+1;
 								String to = digLine.substring(toStart);
-								if(isURLRegistered(to)){
-									System.out.println("Found potential hijack: "+from + " CNAME " + to);
+								if(!isURLRegistered(to)){
+									String potential = to.endsWith(target+".")?"potential":"actual";
+									System.out.println("Found "+potential+" hijack: "+from + " CNAME " + to);
 									found=true;
 								}
 							}
@@ -38,7 +33,6 @@ public class HiJack {
 					}
 				}
 				scanner.close();
-				scannerNoDelimiter.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -54,24 +48,19 @@ public class HiJack {
 	 */
 	public static boolean isURLRegistered(String to) {
 		try {
-			Process extProc = Runtime.getRuntime().exec("nslookup " + to);
-			extProc.waitFor();
-			InputStream theInputStream = extProc.getInputStream();
-			Scanner scanner = new java.util.Scanner(theInputStream);
-			
-			java.util.Scanner theScanner = scanner.useDelimiter("\\A");
-			if (theScanner.hasNext()) {
-				String theReadBuffer = theScanner.next();
+			Scanner scanner = ProcessToScanner.run("nslookup " + to);
+			if (scanner.hasNext()) {
+				String theReadBuffer = scanner.next();
 				// jackpot
 				if(theReadBuffer.contains("** server can't find")){
 					scanner.close();
-					return true;
+					return false;
 				}
 			}
 			scanner.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return false;
+		return true;
 	}
 }

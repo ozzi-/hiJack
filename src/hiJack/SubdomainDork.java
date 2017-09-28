@@ -1,5 +1,4 @@
 package hiJack;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -15,7 +14,6 @@ public class SubdomainDork {
 	 */
 	public static HashSet<String> runCRTSH(String target){
 		HashSet<String> subdomainSet = new HashSet<String>();
-
 		try {
 			String html = HTTP.get("https://crt.sh/?q=%25."+target);
 			Document doc = Jsoup.parse(html);
@@ -44,26 +42,19 @@ public class SubdomainDork {
 		try {
 			HashSet<String> NSSet = getNSOfTarget(target,dnsIPP);
 			System.out.println("Testing for AXFR transfer with "+NSSet.toString());
-			String dnsIP = (dnsIPP==null)?"":" @"+dnsIPP;
 			boolean allFailed=true;
+			
 			for (String NSIP : NSSet) {
 				boolean failed=false;
-				Process extProc = Runtime.getRuntime().exec("dig AXFR " + target+" @"+NSIP);
-				extProc.waitFor();
-				InputStream theInputStream = extProc.getInputStream();
-				Scanner scanner = new java.util.Scanner(theInputStream);
-				
-				java.util.Scanner theScanner = scanner.useDelimiter("\\A");
-				if (theScanner.hasNext()) {
+				Scanner scanner = ProcessToScanner.run("dig AXFR " + target+" @"+NSIP);
+				if (scanner.hasNext()) {
 					String digResult = scanner.next();
-					if(digResult.contains("Transfer failed.") || digResult.contains("connection refused") || digResult.contains("connection timed out") || digResult.contains("network unreachable")){
-						failed=true;
-					}
+					failed = axfrDigFailed(digResult);
 				}
 				if(!failed){
+					// TODO implement logic for getting transfer data
 					System.out.println("AXFR transfer success with "+NSIP+"! TODO implement intel gained here");
 					allFailed=false;
-					// TODO implement logic for getting transfer data
 				}
 				scanner.close();
 			}
@@ -79,24 +70,17 @@ public class SubdomainDork {
 	private static HashSet<String> getNSOfTarget(String target, String dnsIP){
 		HashSet<String> nsSet = new HashSet<String>();
 		try {
-			dnsIP = (dnsIP==null)?"":" @"+dnsIP;
-			Process extProc = Runtime.getRuntime().exec("dig " + target+dnsIP);
-			extProc.waitFor();
-			InputStream theInputStream = extProc.getInputStream();
-			Scanner scanner = new java.util.Scanner(theInputStream);
-			
-			java.util.Scanner theScanner = scanner.useDelimiter("\\A");
-			if (theScanner.hasNext()) {
+			dnsIP = (dnsIP==null)?"":" @"+dnsIP;	
+			Scanner scanner = ProcessToScanner.run("dig " + target+dnsIP);
+			if (scanner.hasNext()) {
 				String digResult = scanner.next();
 				String[] digLines = digResult.split("\n");
 				for (String digLine : digLines) {
-					if (digLine.contains("NS")) {
-						if(digLine.indexOf("NS")>5 && digLine.indexOf("NS")<digLine.length()-4 && Character.isWhitespace(digLine.substring(digLine.indexOf("NS")-1,digLine.indexOf("NS")).charAt(0))) {
-							int toStart = digLine.indexOf("NS") + "NS".length()+1;
-							String to = digLine.substring(toStart);
-							to=to.substring(0, to.length()-1);
-							nsSet.add(to);
-						}
+					if(isActuallyNSLine(digLine)) {
+						int toStart = digLine.indexOf("NS") + "NS".length()+1;
+						String to = digLine.substring(toStart);
+						to=to.substring(0, to.length()-1);
+						nsSet.add(to);
 					}
 				}
 			}
@@ -106,6 +90,12 @@ public class SubdomainDork {
 		}	
 		return nsSet;
 	}
-
 	
+	private static boolean isActuallyNSLine(String digLine){
+		return digLine.indexOf("NS")>5 && digLine.indexOf("NS")<digLine.length()-4 && Character.isWhitespace(digLine.substring(digLine.indexOf("NS")-1,digLine.indexOf("NS")).charAt(0));
+	}
+	
+	private static boolean axfrDigFailed(String digResult){
+		return (digResult.contains("Transfer failed.") || digResult.contains("connection refused") || digResult.contains("connection timed out") || digResult.contains("network unreachable"));
+	}
 }
