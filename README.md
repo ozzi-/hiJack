@@ -1,5 +1,5 @@
 # hiJack
-hiJack will (using crt.sh) collect subdomains of your target.
+hiJack will (using crt.sh - certificate transparency) collect subdomains of your target.
 if the target subdomains contain any cnames that are not registered, it will let you know.
 
 Inspired by @seckle_ch talk at bsides zuerich
